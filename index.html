@@ -4,107 +4,385 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProVoid | Secure Download</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Audiowide&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #030303;
+            --bg-color: #000000;
             --accent: #ffffff;
             --border: rgba(255, 255, 255, 0.1);
         }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg-color); color: #fff; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
+        body { 
+            background: var(--bg-color); 
+            color: #fff; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            position: relative;
+        }
 
-        /* Background Effects */
-        #snow-canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1; }
-        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 70%); z-index: -1; }
+        /* Cosmic Background */
+        #cosmic-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .void-gradient {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 40%, rgba(30, 30, 40, 0.3) 0%, rgba(20, 20, 30, 0.2) 40%, transparent 70%);
+            z-index: 0;
+        }
+
+        /* Black Hole Animation */
+        .blackhole-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .blackhole {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, transparent 30%, rgba(0, 0, 0, 0.95) 50%, #000 70%);
+            box-shadow: 0 0 80px rgba(100, 100, 100, 0.4), inset 0 0 80px rgba(80, 80, 80, 0.3);
+            animation: voidPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes voidPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .accretion-disk {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(75deg);
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            border: 2px solid rgba(120, 120, 120, 0.3);
+            animation: rotate 20s linear infinite;
+            box-shadow: 0 0 40px rgba(100, 100, 100, 0.3);
+        }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(0deg); }
+            to { transform: translate(-50%, -50%) rotateX(75deg) rotateZ(360deg); }
+        }
+
+        .crystal {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(60, 60, 60, 0.9) 50%, rgba(20, 20, 20, 0.95) 100%);
+            clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+            animation: crystalSink 8s ease-in-out infinite, crystalSpin 12s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(200, 200, 200, 0.5));
+            box-shadow: inset 0 0 30px rgba(120, 120, 120, 0.3);
+        }
+
+        @keyframes crystalSink {
+            0% { top: -100px; opacity: 0; transform: translateX(-50%) scale(0.5); }
+            20% { opacity: 1; transform: translateX(-50%) scale(1); }
+            80% { opacity: 1; transform: translateX(-50%) scale(1); }
+            100% { top: 50%; opacity: 0; transform: translateX(-50%) scale(0.2); }
+        }
+
+        @keyframes crystalSpin {
+            from { transform: translateX(-50%) rotateZ(0deg); }
+            to { transform: translateX(-50%) rotateZ(360deg); }
+        }
 
         /* Download Card */
         .download-card {
             width: 90%;
-            max-width: 450px;
-            background: rgba(15, 15, 15, 0.8);
+            max-width: 500px;
+            background: rgba(15, 15, 15, 0.85);
             border: 1px solid var(--border);
-            padding: 3rem 2rem;
-            border-radius: 24px;
+            padding: 3.5rem 2.5rem;
+            border-radius: 32px;
             text-align: center;
             backdrop-filter: blur(20px);
             position: relative;
             z-index: 10;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
         }
 
-        .file-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.8; }
-        h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -1px; }
-        p { color: #666; font-size: 0.9rem; margin-bottom: 2.5rem; }
+        .logo {
+            font-family: 'Audiowide', sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #fff;
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 15px #fff; }
+            50% { box-shadow: 0 0 25px #fff; }
+        }
+
+        .file-icon { 
+            font-size: 4rem; 
+            margin-bottom: 1.5rem; 
+            opacity: 0.9; 
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+        }
+
+        h1 { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            margin-bottom: 0.5rem; 
+            letter-spacing: -1px; 
+        }
+
+        .file-info { 
+            color: #888; 
+            font-size: 0.9rem; 
+            margin-bottom: 2.5rem; 
+            font-family: 'JetBrains Mono', monospace;
+        }
 
         /* Loading Bar System */
-        .loading-container { display: none; margin-bottom: 2rem; }
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
-        .bar-fill { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; transition: width 0.1s linear; }
-        .status-text { font-family: 'JetBrains Mono'; font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+        .loading-container { 
+            display: none; 
+            margin-bottom: 2rem; 
+        }
+
+        .bar-bg { 
+            width: 100%; 
+            height: 6px; 
+            background: rgba(255,255,255,0.05); 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin-bottom: 12px; 
+        }
+
+        .bar-fill { 
+            width: 0%; 
+            height: 100%; 
+            background: #fff; 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); 
+            transition: width 0.15s linear; 
+        }
+
+        .status-text { 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 0.7rem; 
+            color: #888; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+        }
 
         /* Buttons */
         .btn {
             width: 100%;
             padding: 1.2rem;
-            border-radius: 12px;
+            border-radius: 14px;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            font-size: 1rem;
+            gap: 12px;
+            font-size: 1.05rem;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-verify { background: #fff; color: #000; }
-        .btn-verify:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-verify { 
+            background: rgba(255, 255, 255, 0.08); 
+            color: #fff; 
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-verify:hover { 
+            transform: translateY(-4px) scale(1.02); 
+            box-shadow: 0 15px 40px rgba(255,255,255,0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+        }
         
         .btn-ready { 
-            background: transparent; 
-            border: 1px solid #fff; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 2px solid rgba(255, 255, 255, 0.3); 
             color: #fff; 
             display: none; 
             text-decoration: none;
+            backdrop-filter: blur(10px);
         }
-        .btn-ready:hover { background: #fff; color: #000; }
+
+        .btn-ready:hover { 
+            background: rgba(255, 255, 255, 0.15); 
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(255,255,255,0.2);
+        }
 
         /* Checkbox Styling */
         .verify-box {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
             background: rgba(255,255,255,0.03);
-            padding: 1rem;
-            border-radius: 12px;
+            padding: 1.2rem;
+            border-radius: 14px;
             border: 1px solid var(--border);
             margin-bottom: 2rem;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s;
         }
-        .verify-box:hover { background: rgba(255,255,255,0.06); }
-        .checkbox { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; position: relative; }
-        .checkbox.checked { background: #fff; border-color: #fff; }
-        .checkbox.checked::after { content: '✓'; color: #000; font-size: 14px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        .verify-box:hover { 
+            background: rgba(255,255,255,0.06); 
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox { 
+            width: 22px; 
+            height: 22px; 
+            border: 2px solid #444; 
+            border-radius: 6px; 
+            position: relative; 
+            transition: all 0.3s;
+        }
+
+        .checkbox.checked { 
+            background: #fff; 
+            border-color: #fff; 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+
+        .checkbox.checked::after { 
+            content: '✓'; 
+            color: #000; 
+            font-size: 16px; 
+            font-weight: bold;
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 2rem;
+            padding: 0.8rem;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #00ff88;
+        }
+
+        .made-by {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #00ff88;
+            text-shadow: 
+                0 0 10px rgba(0, 255, 136, 0.8),
+                0 0 20px rgba(0, 255, 136, 0.6);
+            animation: neonPulse 2s ease-in-out infinite;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 10px rgba(0, 255, 136, 0.8),
+                    0 0 20px rgba(0, 255, 136, 0.6);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 15px rgba(0, 255, 136, 1),
+                    0 0 30px rgba(0, 255, 136, 0.8);
+            }
+        }
     </style>
 </head>
 <body>
 
-    <canvas id="snow-canvas"></canvas>
-    <div class="bg-glow"></div>
+    <canvas id="cosmic-canvas"></canvas>
+    <div class="void-gradient"></div>
+
+    <!-- Black Hole & Crystal -->
+    <div class="blackhole-container">
+        <div class="blackhole"></div>
+        <div class="accretion-disk"></div>
+        <div class="crystal"></div>
+    </div>
 
     <div class="download-card">
+        <div class="logo">
+            <div class="logo-dot"></div>
+            PROVOID
+        </div>
+
         <div class="file-icon">📦</div>
         <h1>ProVoid_v2.0.4.zip</h1>
-        <p>Size: 14.2 MB • Secure Cloud Distribution</p>
+        <p class="file-info">Size: 14.2 MB • Secure Distribution</p>
 
         <div id="verify-step">
             <div class="verify-box" onclick="toggleCheck()">
                 <div class="checkbox" id="check-ui"></div>
-                <span style="font-size: 0.85rem; color: #bbb;">I am not a robot</span>
+                <span style="font-size: 0.9rem; color: #bbb;">I am not a robot</span>
             </div>
-            <button class="btn btn-verify" onclick="startDownload()">Start Verification</button>
+            <button class="btn btn-verify" onclick="startDownload()">
+                <span>Start Verification</span>
+                <span>→</span>
+            </button>
         </div>
 
         <div class="loading-container" id="loading-step">
@@ -114,38 +392,64 @@
             <div class="status-text" id="status">Connecting to server...</div>
         </div>
 
-        <a href="YOUR_DIRECT_FILE_URL_HERE" class="btn btn-ready" id="final-btn">
-            Download Now
+        <a href="https://github.com/GhostExe-cloud/D-Lead/releases/download/v1/ProVoid.zip" class="btn btn-ready" id="final-btn">
+            <span>Download Now</span>
+            <span>⬇</span>
         </a>
+
+        <div class="security-badge">
+            <span>🛡️</span>
+            <span>Secured by VMProtect • Virus Total Clean</span>
+        </div>
+
+        <div class="made-by">Made by Coder</div>
     </div>
 
     <script>
-        // --- SNOW ANIMATION ---
-        const canvas = document.getElementById('snow-canvas');
+        // Cosmic Canvas
+        const canvas = document.getElementById('cosmic-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-        function initSnow() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             particles = [];
-            for (let i = 0; i < 50; i++) {
-                particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, radius: Math.random() * 2 + 1, speed: Math.random() * 0.5 + 0.2 });
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    speed: Math.random() * 0.3 + 0.1,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
             }
         }
-        function drawSnow() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-            ctx.beginPath();
-            particles.forEach(p => {
-                ctx.moveTo(p.x, p.y); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                p.y += p.speed; if (p.y > canvas.height) p.y = -5;
-            });
-            ctx.fill(); requestAnimationFrame(drawSnow);
-        }
-        window.addEventListener('resize', initSnow);
-        initSnow(); drawSnow();
 
-        // --- DOWNLOAD LOGIC ---
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                ctx.fill();
+                
+                p.y += p.speed;
+                if (p.y > canvas.height) p.y = -5;
+                
+                p.opacity += (Math.random() - 0.5) * 0.02;
+                p.opacity = Math.max(0.2, Math.min(0.8, p.opacity));
+            });
+            requestAnimationFrame(animate);
+        }
+
+        initCanvas();
+        animate();
+        window.addEventListener('resize', initCanvas);
+
+        // Download Logic
         let isChecked = false;
+        const encryptedLink = "aHR0cHM6Ly9naXRodWIuY29tL0dob3N0RXhlLWNsb3VkL0QtTGVhZC9yZWxlYXNlcy9kb3dubG9hZC92MS9Qcm9Wb2lkLnppcA==";
 
         function toggleCheck() {
             isChecked = !isChecked;
@@ -167,31 +471,33 @@
             const status = document.getElementById('status');
             
             const messages = [
-                "Establishing secure tunnel...",
-                "Bypassing node congestion...",
-                "Decrypting file headers...",
-                "Finalizing package...",
-                "Ready for transfer."
+                "CONNECTING TO SERVER...",
+                "ESTABLISHING SECURE TUNNEL...",
+                "BYPASSING NODE CONGESTION...",
+                "DECRYPTING FILE HEADERS...",
+                "VERIFYING INTEGRITY...",
+                "FINALIZING PACKAGE...",
+                "READY FOR TRANSFER"
             ];
 
             const interval = setInterval(() => {
-                progress += Math.random() * 2;
+                progress += Math.random() * 1.5 + 0.5;
                 if (progress > 100) progress = 100;
                 
                 bar.style.width = progress + "%";
                 
                 // Update text based on percentage
-                if (progress > 80) status.innerText = messages[4];
-                else if (progress > 60) status.innerText = messages[3];
-                else if (progress > 40) status.innerText = messages[2];
-                else if (progress > 20) status.innerText = messages[1];
+                const msgIndex = Math.floor((progress / 100) * messages.length);
+                status.innerText = messages[Math.min(msgIndex, messages.length - 1)];
 
                 if (progress >= 100) {
                     clearInterval(interval);
                     setTimeout(() => {
                         document.getElementById('loading-step').style.display = 'none';
-                        document.getElementById('final-btn').style.display = 'flex';
-                    }, 500);
+                        const finalBtn = document.getElementById('final-btn');
+                        finalBtn.href = atob(encryptedLink);
+                        finalBtn.style.display = 'flex';
+                    }, 600);
                 }
             }, 50);
         }
